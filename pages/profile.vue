@@ -6,8 +6,8 @@
         <img :src="user.image || defaultImage" alt="Profile Image" class="img-fluid" />
       </div>
       <div class="profile-info col-md-6">
-        <h1 class="h3 fw-bold">{{ user.name }}</h1>
-        <p class="fw-medium">{{ user.email }}</p>
+        <h1 class="h3 fw-bold">{{ user.name || "Loading.." }}</h1>
+        <p class="fw-medium">{{ user.email || "Loading.." }}</p>
         <p class="profile-about">{{ user.about }}</p>
       </div>
       <div class="col-md-2 d-flex align-items-center">
