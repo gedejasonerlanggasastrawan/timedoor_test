@@ -135,30 +135,12 @@ export default {
     };
 
     const logout = async () => {
-      const token = Cookies.get("authToken"); // Get token from cookies
-      if (token) {
-        await fetch("https://c9d5-103-100-175-121.ngrok-free.app/api/logout", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
-      // Clear cookies and reset user data
-      Cookies.remove("authToken");
-      Cookies.remove("user");
-      Cookies.remove("isLoggedIn");
-      closeLogoutModal(); // Close modal after logout
+      localStorage.removeItem("TOKEN");
+      localStorage.removeItem("IDUSER");
 
-      // Cek apakah pengguna berada di halaman '/'
-      if (router.currentRoute.value.path === "/") {
-        // Jika di halaman '/', redirect dan refresh
-        router.push("/"); // Redirect ke halaman /
-        window.location.reload(); // Refresh halaman
-      } else {
-        // Jika tidak di halaman '/', hanya redirect
-        router.push("/"); // Redirect ke halaman /
-      }
+      console.log('See You!')
+
+      router.push('/x')
     };
 
     onMounted(async () => {
