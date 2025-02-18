@@ -287,14 +287,14 @@ export default {
 
     const fetchRomanceStories = async () => {
       try {
-        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/7`, {
+        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/8`, {
           headers: {
             "ngrok-skip-browser-warning": "69420",
           },
         });
         romances.value = response.data.data.data; // Access the nested data array
-        // console.log("--data---");
-        // console.log(romances.value);
+        console.log("--data---");
+        console.log(romances.value);
       } catch (error) {
         console.error("Error fetching latest stories:", error);
       }
@@ -302,7 +302,7 @@ export default {
 
     const fetchHorrorStories = async () => {
       try {
-        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/8`, {
+        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/9`, {
           headers: {
             "ngrok-skip-browser-warning": "69420",
           },
