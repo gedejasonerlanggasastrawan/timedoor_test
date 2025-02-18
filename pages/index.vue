@@ -10,7 +10,13 @@
       community of 90 million readers and writers through the power of story.
     </p>
     <div class="search-container">
-      <input type="text" placeholder="Search story" class="search-input" />
+      <input
+        type="text"
+        placeholder="Search story"
+        class="search-input"
+        @keyup.enter="goToSearchPage"
+        v-model="searchquery"
+      />
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
     </div>
     <div class="imgAwal">
@@ -204,7 +210,7 @@
   <Footer></Footer>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from "@/store/auth";
 import { ref, onMounted, computed } from "vue";
 import Cookies from "js-cookie";
@@ -214,159 +220,142 @@ import Card from "@/components/Card.vue";
 import CardBig from "@/components/CardBig.vue";
 import CardSmall from "@/components/CardSmall.vue";
 import CardLatest from "@/components/CardLatest.vue";
+import { useRouter } from "vue-router";
 import imageSrc from "../asset/home/test.jpg";
 import profilePic from "../asset/home/test.jpg";
 
-export default {
-  components: {
-    Card,
-    CardBig,
-    CardSmall,
-    CardLatest,
-  },
-  setup() {
-    const authStore = useAuthStore();
-    const user = ref(null);
-    const isLoggedIn = computed(() => {
-      return Cookies.get("isLoggedIn") === "true";
+const searchquery = ref("");
+const router = useRouter();
+const authStore = useAuthStore();
+const user = ref(null);
+const isLoggedIn = computed(() => {
+  return Cookies.get("isLoggedIn") === "true";
+});
+
+const getUserData = () => {
+  const userData = Cookies.get("user");
+  return userData ? JSON.parse(userData) : null;
+};
+
+// Format date function
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const showLoginModal = ref(false);
+const showRegisterModal = ref(false);
+const stories = ref([]);
+const romances = ref([]); // Pastikan ini ada di bagian setup
+const comedies = ref([]); // Inisialisasi array komedi
+const horrors = ref([]); // Inisialisasi array horror
+
+// Fetch latest stories
+const fetchLatestStories = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
     });
+    stories.value = response.data.stories.data; // Access the nested data array
+    // console.log("--data---");
+    // console.log(stories.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+};
 
-    const getUserData = () => {
-      const userData = Cookies.get("user");
-      return userData ? JSON.parse(userData) : null;
-    };
-
-    // Format date function
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    };
-
-    const showLoginModal = ref(false);
-    const showRegisterModal = ref(false);
-    const stories = ref([]);
-    const romances = ref([]); // Pastikan ini ada di bagian setup
-    const comedies = ref([]); // Inisialisasi array komedi
-    const horrors = ref([]); // Inisialisasi array horror
-
-    // Fetch latest stories
-    const fetchLatestStories = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        stories.value = response.data.stories.data; // Access the nested data array
-        // console.log("--data---");
-        // console.log(stories.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    // Fetch comedy stories
-    const fetchComedyStories = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/1`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        comedies.value = response.data.data.data; // Access the nested data array
-        // console.log("--data---");
-        // console.log(comedies.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    const fetchRomanceStories = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/8`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        romances.value = response.data.data.data; // Access the nested data array
-        console.log("--data---");
-        console.log(romances.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    const fetchHorrorStories = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories-by-category/9`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        horrors.value = response.data.data.data; // Access the nested data array
-        console.log("--data---");
-        console.log(horrors.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    const showSuccessModal = () => {
-      if (authStore.isLoggedIn) {
-        showLoginModal.value = true;
-      } else if (authStore.isRegistered) {
-        showRegisterModal.value = true;
-      }
-
-      setTimeout(() => {
-        closeLoginModal();
-        closeRegisterModal();
-      }, 10000);
-    };
-
-    onMounted(async () => {
-      user.value = getUserData();
-      await authStore.fetchUserData();
-      await fetchLatestStories();
-      await fetchRomanceStories(); // Ambil cerita romansa
-      await fetchComedyStories(); // Ambil cerita komedi
-      await fetchHorrorStories(); // Ambil cerita horor
-      showSuccessModal();
+// Fetch comedy stories
+const fetchComedyStories = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories-by-category/1`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
     });
+    comedies.value = response.data.data.data; // Access the nested data array
+    // console.log("--data---");
+    // console.log(comedies.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+};
 
-    const closeLoginModal = () => {
-      showLoginModal.value = false;
-    };
+const fetchRomanceStories = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories-by-category/8`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
+    });
+    romances.value = response.data.data.data; // Access the nested data array
+    console.log("--data---");
+    console.log(romances.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+};
 
-    const closeRegisterModal = () => {
-      showRegisterModal.value = false;
-    };
+const fetchHorrorStories = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories-by-category/9`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
+    });
+    horrors.value = response.data.data.data; // Access the nested data array
+    console.log("--data---");
+    console.log(horrors.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+};
 
-    return {
-      user,
-      isLoggedIn,
-      authStore,
-      showLoginModal,
-      showRegisterModal,
-      closeLoginModal,
-      closeRegisterModal,
-      stories,
-      comedies,
-      romances,
-      horrors,
-      formatDate,
-      ngrokUrl,
-    };
-  },
-  head() {
-    return {
-      title: "Welcome to Storytime",
-    };
-  },
+const showSuccessModal = () => {
+  if (authStore.isLoggedIn) {
+    showLoginModal.value = true;
+  } else if (authStore.isRegistered) {
+    showRegisterModal.value = true;
+  }
+
+  setTimeout(() => {
+    closeLoginModal();
+    closeRegisterModal();
+  }, 10000);
+};
+
+
+const goToSearchPage = () => {
+  if (searchquery.value.trim()) {
+    router.push(`/allstory?searchquery=${encodeURIComponent(searchquery.value)}`);
+  }
+};
+
+onMounted(async () => {
+  user.value = getUserData();
+  await authStore.fetchUserData();
+  await fetchLatestStories();
+  await fetchRomanceStories(); // Ambil cerita romansa
+  await fetchComedyStories(); // Ambil cerita komedi
+  await fetchHorrorStories(); // Ambil cerita horor
+  showSuccessModal();
+});
+
+watch(() => {
+  console.log('user search query : ' + searchquery.value)
+})
+
+const closeLoginModal = () => {
+  showLoginModal.value = false;
+};
+
+const closeRegisterModal = () => {
+  showRegisterModal.value = false;
 };
 </script>
 

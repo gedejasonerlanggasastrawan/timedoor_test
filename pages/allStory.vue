@@ -86,16 +86,20 @@ import Card from "@/components/Card.vue"; // Import Card.vue
 import imageSrc from "../asset/home/test.jpg"; // Gambar placeholder
 import profilePic from "../asset/home/test.jpg"; // Gambar profil placeholder
 import { ngrokUrl } from "@/store/ngrokConfig";
+import { useRoute } from "vue-router";
 import axios from "axios";
 
 const authStore = useAuthStore();
+const route = useRoute();
 const sortOption = ref("newest");
 const selectedCategory = ref("all");
-const searchQuery = ref("");
+// const searchQuery = ref("");
 const currentPage = ref(1);
 const itemsPerPage = 12; // Jumlah item per halaman diubah menjadi 12
 
 const stories = ref([]);
+
+const searchQuery = computed(() => route.query.searchquery || "");
 
 const filteredStories = computed(() => {
   return stories.value
@@ -239,6 +243,11 @@ watch(async() => {
     await fetchStoriesZA();
   }
   console.log(selectedCategory.value);
+
+
+  // 
+
+
 });
 </script>
 
