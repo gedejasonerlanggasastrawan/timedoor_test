@@ -51,7 +51,7 @@
             <h3 class="">Change Password</h3>
             <label for="old-password" class="form-label mt-5">Old Password</label>
             <input
-              type="password"
+              type="text"
               v-model="formData.oldPassword"
               placeholder="Enter your old password"
               class="form-control mb-2 p-3"
@@ -59,7 +59,7 @@
 
             <label for="new-password" class="form-label">New Password</label>
             <input
-              type="password"
+              type="text"
               v-model="formData.newPassword"
               placeholder="Enter your new password"
               class="form-control mb-2 p-3"
@@ -67,7 +67,7 @@
 
             <label for="confirm-password" class="form-label">Confirm New Password</label>
             <input
-              type="password"
+              type="text"
               v-model="formData.confirmPassword"
               placeholder="Re-enter your new password"
               class="form-control mb-2 p-3"
@@ -102,12 +102,9 @@
       </div>
 
       <div v-if="isMyStory" class="col-md-8">
+        <div v-if="loading">Loading...</div>
 
-      <div v-if="loading">
-        Loading...
-      </div>
-
-        <div  v-if="Array.isArray(stories) && stories.length > 0" class="stories-grid">
+        <div v-if="Array.isArray(stories) && stories.length > 0" class="stories-grid">
           <CardUser
             v-for="story in stories"
             :key="story.id"
@@ -132,30 +129,46 @@
       </div>
 
       <div v-else class="col-md-8">
-        <div class="bookmark-section text-center">
-          <h2>No Bookmarks Yet</h2>
-          <p>
-            You haven't saved any bookmarks yet. Explore and bookmark your top workouts!
-          </p>
-          <div class="illustration">
-            <img
-              src="@/asset/profile/bookmark.png"
-              alt="Bookmark Illustration"
-              class="img-fluid"
-            />
+        <div v-if="bookmarks.length == 0">
+          <div class="bookmark-section text-center">
+            <h2>No Bookmarks Yet</h2>
+            <p>
+              You haven't saved any bookmarks yet. Explore and bookmark your top workouts!
+            </p>
+            <div class="illustration">
+              <img
+                src="@/asset/profile/bookmark.png"
+                alt="Bookmark Illustration"
+                class="img-fluid"
+              />
+            </div>
           </div>
+        </div>
+
+        <div v-if="loading">Loading...</div>
+
+        <div v-if="Array.isArray(bookmarks) && bookmarks.length > 0" class="stories-grid">
+          <CardUser2
+            v-for="book in bookmarks"
+            :key="book.id"
+            :id="book.id"
+            :imageSrc="`${ngrokUrl}/storage/${book.story.images[0].image_path}`"
+            :profilePic="`${ngrokUrl}/storage/${book.story.users.profile_image}`"
+            :title="book.story.title"
+            :description="book.story.content"
+            :userName="book.story.users.username"
+            :createdAt="formatDate(book.story.created_at)"
+            :storyId="book.id"
+          />
         </div>
       </div>
     </div>
     <!-- Navigation for My Story and Bookmark -->
 
     <!-- Pagination -->
-    <div v-if="stories.length > 0" class="pagination py-5 my-5">
-      <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-        <button
-          class="active"
-        >...
-        </button>
+    <div class="pagination py-5 my-5">
+      <button @click="prevPage">Previous</button>
+      <button class="active">{{ page }}</button>
       <button @click="nextPage">Next</button>
     </div>
   </div>
@@ -188,6 +201,7 @@ const formData = ref({
 });
 const currentPage = ref(1);
 const storiesPerPage = 4;
+const bookmarks = ref([]);
 
 const imagePreview = computed(() => {
   if (formData.value.image && formData.value.image instanceof File) {
@@ -241,7 +255,33 @@ const fetchUserStories = async () => {
   try {
     const token = localStorage.getItem("TOKEN");
 
-    const response = await axios.get(`${ngrokUrl}/api/stories/my-stories?page=${page.value}`, {
+    const response = await axios.get(
+      `${ngrokUrl}/api/stories/my-stories?page=${page.value}`,
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          Authorization: `Bearer ${token}`, // Add Sanctum Token
+          Accept: "application/json",
+        },
+      }
+    );
+
+    stories.value = response.data.data.data;
+
+    console.log("User Stories:", response.data.data);
+  } catch (error) {
+    console.error("Error fetching user stories:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const fetchUserBookmarks = async () => {
+  loading.value = true;
+  try {
+    const token = localStorage.getItem("TOKEN");
+
+    const response = await axios.get(`${ngrokUrl}/api/bookmarks?page=${page.value}`, {
       headers: {
         "ngrok-skip-browser-warning": "69420",
         Authorization: `Bearer ${token}`, // Add Sanctum Token
@@ -249,11 +289,11 @@ const fetchUserStories = async () => {
       },
     });
 
-    stories.value = response.data.data.data;
+    bookmarks.value = response.data.data.data;
 
-    console.log("User Stories:", response.data.data);
+    console.log("User bookmarks:", response.data.data);
   } catch (error) {
-    console.error("Error fetching user stories:", error);
+    console.error("Error fetching user bookmarks:", error);
   } finally {
     loading.value = false;
   }
@@ -267,6 +307,7 @@ const formatDate = (dateString) => {
 onMounted(async () => {
   await userFetchData();
   await fetchUserStories();
+  await fetchUserBookmarks();
 });
 
 const openModal = () => {
@@ -292,67 +333,84 @@ const updateProfile = async () => {
   try {
     const updatedData = {
       name: formData.value.name,
-      email: formData.value.email,
       about: formData.value.about,
+      email: formData.value.email,
+      old_password: formData.value.oldPassword,
+      new_password: formData.value.newPassword,
+      confirim_new_password: formData.value.confirmPassword,
+      profile_image: formData.value.image,
     };
 
-    await authStore.updateProfile(updatedData);
+    const token = localStorage.getItem("TOKEN");
 
-    if (formData.value.image) {
-      const formDataImage = new FormData();
-      formDataImage.append("image", formData.value.image);
-      await authStore.updateImage(formDataImage);
+    console.log(updatedData)
+
+    try {
+      const response = await axios.put(`${ngrokUrl}/api/edit-profile`, updatedData, {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "Authorization": `Bearer ${token}`, // Add Sanctum Token
+          "Accept": "application/json",
+          "Content-Type": "multipart/form-data"
+        },
+        method: "POST",
+      });
+
+      // const response2 = await axios.post(`${ngrokUrl}/api/edit-profile-image`, updatedData, {
+      //   headers: {
+      //     "ngrok-skip-browser-warning": "69420",
+      //     "Authorization": `Bearer ${token}`, // Add Sanctum Token
+      //     "Accept": "application/json",
+      //     "Content-Type": "multipart/form-data"
+      //   },
+      //   method: "POST",
+      // });
+
+      console.log("---- data ----");
+      // comedies.value = response.data.data.data; // Access the nested data array
+      console.log(response.data);
+      // console.log(response2.data);
+      // console.log(comedies.value);
+      console.log("Berhasil menambahkan gambar");
+
+      await userFetchData();
+      await fetchUserStories();
+      // closeModal();
+      // location.reload();
+    } catch (error) {
+      console.error("Error fetching latest stories:", error);
     }
-
-    if (
-      formData.value.newPassword &&
-      formData.value.newPassword === formData.value.confirmPassword
-    ) {
-      const passwordData = {
-        old_password: formData.value.oldPassword,
-        new_password: formData.value.newPassword,
-        confirm_password: formData.value.confirmPassword,
-      };
-      await authStore.changePassword(passwordData);
-    }
-
-    await userFetchData();
-    await fetchUserStories();
-    closeModal();
-    location.reload();
   } catch (error) {
     console.error("Error updating profile:", error);
   }
 };
 
 const showMyStory = () => {
+  page.value = 1;
   isMyStory.value = true;
 };
 
 const showBookmark = () => {
+  page.value = 1;
   isMyStory.value = false;
 };
 
 const nextPage = () => {
-  if (page.value) {
-    page.value++;
-  }
-  console.log(page.value)
+  page.value = page.value + 1;
+  console.log(page.value);
 };
 
 const prevPage = () => {
-  if (page.value > 1) {
-    page.value--;
-  }
-  console.log(page.value)
-
+  page.value = page.value - 1;
+  console.log(page.value);
 };
 
 watch(() => {
-  if(page.value) {
-    fetchUserStories()
+  if (page.value) {
+    fetchUserStories();
+    fetchUserBookmarks();
   }
-})
+});
 </script>
 
 <style scoped>
