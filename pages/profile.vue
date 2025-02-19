@@ -11,9 +11,7 @@
         <p class="profile-about">{{ user.about }}</p>
       </div>
       <div class="col-md-2 d-flex align-items-center">
-        <button @click="openModal" class="btn btn-profile ms-3">
-          Edit Profile
-        </button>
+        <button @click="openModal" class="btn btn-profile ms-3">Edit Profile</button>
       </div>
     </div>
 
@@ -29,9 +27,7 @@
               <div class="profile-image mt-3">
                 <img :src="imagePreview" alt="Profile Image" class="img-fluid" />
               </div>
-              <button @click="selectFile" class="btn btn-change">
-                Change Picture
-              </button>
+              <button @click="selectFile" class="btn btn-change">Change Picture</button>
             </div>
 
             <div class="name-section mt-3">
@@ -39,7 +35,12 @@
               <input type="text" v-model="formData.name" class="form-control mb-2 p-3" />
 
               <label for="email" class="form-label">Email</label>
-              <input type="email" v-model="formData.email" class="form-control mb-2 p-3" disabled />
+              <input
+                type="email"
+                v-model="formData.email"
+                class="form-control mb-2 p-3"
+                disabled
+              />
 
               <label for="about" class="form-label">About Me</label>
               <textarea v-model="formData.about" class="form-control mb-2 p-4"></textarea>
@@ -49,26 +50,34 @@
           <div class="password-section col-md-6">
             <h3 class="">Change Password</h3>
             <label for="old-password" class="form-label mt-5">Old Password</label>
-            <input type="password" v-model="formData.oldPassword" placeholder="Enter your old password"
-              class="form-control mb-2 p-3" />
+            <input
+              type="password"
+              v-model="formData.oldPassword"
+              placeholder="Enter your old password"
+              class="form-control mb-2 p-3"
+            />
 
             <label for="new-password" class="form-label">New Password</label>
-            <input type="password" v-model="formData.newPassword" placeholder="Enter your new password"
-              class="form-control mb-2 p-3" />
+            <input
+              type="password"
+              v-model="formData.newPassword"
+              placeholder="Enter your new password"
+              class="form-control mb-2 p-3"
+            />
 
             <label for="confirm-password" class="form-label">Confirm New Password</label>
-            <input type="password" v-model="formData.confirmPassword" placeholder="Re-enter your new password"
-              class="form-control mb-2 p-3" />
+            <input
+              type="password"
+              v-model="formData.confirmPassword"
+              placeholder="Re-enter your new password"
+              class="form-control mb-2 p-3"
+            />
           </div>
         </div>
 
         <div class="button mt-3">
-          <button @click="closeModal" class="btn btn-cancel me-4">
-            Cancel
-          </button>
-          <button @click="updateProfile" class="btn btn-update">
-            Update Profile
-          </button>
+          <button @click="closeModal" class="btn btn-cancel me-4">Cancel</button>
+          <button @click="updateProfile" class="btn btn-update">Update Profile</button>
         </div>
       </div>
     </div>
@@ -88,28 +97,34 @@
     <div class="d-flex container">
       <div class="write-story col-md-4 me-5">
         <h3 class="mb-3">Write your story</h3>
-        <p>
-          Share your unique voice with the world – start writing your story
-          today!
-        </p>
+        <p>Share your unique voice with the world – start writing your story today!</p>
         <nuxt-link to="/addStory" class="btn btn-write-story mt-3">Write Story</nuxt-link>
       </div>
 
       <div v-if="isMyStory" class="col-md-8">
-        <div v-if="stories.length > 0" class="stories-grid">
-          <CardUser v-for="story in paginatedStories" :key="story.id"
-            :imageSrc="`${ngrokUrl}/storage/${story.content_images[0].path}`"
-            :profilePic="`${ngrokUrl}/storage/${story.user.image}`" :title="story.title"
-            :description="story.content" :userName="story.user.username" :createdAt="formatDate(story.created_at)"
-            :storyId="story.id" />
+
+      <div v-if="loading">
+        Loading...
+      </div>
+
+        <div  v-if="Array.isArray(stories) && stories.length > 0" class="stories-grid">
+          <CardUser
+            v-for="story in stories"
+            :key="story.id"
+            :id="story.id"
+            :imageSrc="`${ngrokUrl}/storage/${story.images[0].image_path}`"
+            :profilePic="`${ngrokUrl}/storage/${story.users.profile_image}`"
+            :title="story.title"
+            :description="story.content"
+            :userName="story.users.username"
+            :createdAt="formatDate(story.created_at)"
+            :storyId="story.id"
+          />
         </div>
 
         <div v-else class="story-section text-center">
           <h2>No Stories Yet</h2>
-          <p>
-            You haven't shared any stories yet. Start your fitness journey
-            today!
-          </p>
+          <p>You haven't shared any stories yet. Start your fitness journey today!</p>
           <div class="illustration">
             <img src="@/asset/profile/story.png" alt="Illustration" class="img-fluid" />
           </div>
@@ -120,11 +135,14 @@
         <div class="bookmark-section text-center">
           <h2>No Bookmarks Yet</h2>
           <p>
-            You haven't saved any bookmarks yet. Explore and bookmark your top
-            workouts!
+            You haven't saved any bookmarks yet. Explore and bookmark your top workouts!
           </p>
           <div class="illustration">
-            <img src="@/asset/profile/bookmark.png" alt="Bookmark Illustration" class="img-fluid" />
+            <img
+              src="@/asset/profile/bookmark.png"
+              alt="Bookmark Illustration"
+              class="img-fluid"
+            />
           </div>
         </div>
       </div>
@@ -134,24 +152,16 @@
     <!-- Pagination -->
     <div v-if="stories.length > 0" class="pagination py-5 my-5">
       <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-      <span v-for="page in totalPages" :key="page">
-        <button v-if="
-          page === 1 ||
-          page === totalPages ||
-          (page >= currentPage - 1 && page <= currentPage + 1)
-        " @click="currentPage = page" :class="{ active: currentPage === page }">
-          {{ page }}
+        <button
+          class="active"
+        >...
         </button>
-        <span v-if="page === currentPage + 2"></span>
-      </span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">
-        Next
-      </button>
+      <button @click="nextPage">Next</button>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from "@/store/auth";
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
@@ -160,227 +170,189 @@ import Cookies from "js-cookie";
 import CardUser from "~/components/CardUser.vue";
 import { ngrokUrl } from "@/store/ngrokConfig";
 
-export default {
-  components: {
-    CardUser,
-  },
-  setup() {
-    const authStore = useAuthStore();
-    const user = ref({});
-    const isModalOpen = ref(false);
-    const isMyStory = ref(true);
-    const stories = ref([]);
-    const formData = ref({
-      name: "",
-      email: "",
-      about: "",
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-      image: null,
-    });
-    const currentPage = ref(1);
-    const storiesPerPage = 4;
+const authStore = useAuthStore();
+const user = ref({});
+const isModalOpen = ref(false);
+const isMyStory = ref(true);
+const loading = ref(false);
+const stories = ref([]);
+const page = ref(1);
+const formData = ref({
+  name: "",
+  email: "",
+  about: "",
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+  image: null,
+});
+const currentPage = ref(1);
+const storiesPerPage = 4;
 
-    const imagePreview = computed(() => {
-      if (formData.value.image && formData.value.image instanceof File) {
-        return URL.createObjectURL(formData.value.image);
-      }
-      return user.value.image || defaultImage;
-    });
+const imagePreview = computed(() => {
+  if (formData.value.image && formData.value.image instanceof File) {
+    return URL.createObjectURL(formData.value.image);
+  }
+  return user.value.image || defaultImage;
+});
 
-    const totalPages = computed(() =>
-      Math.ceil(stories.value.length / storiesPerPage)
-    );
+const totalPages = computed(() => Math.ceil(stories.value.length / storiesPerPage));
 
-    const paginatedStories = computed(() => {
-      const start = (currentPage.value - 1) * storiesPerPage;
-      const end = start + storiesPerPage;
-      return stories.value.slice(start, end);
-    });
+const paginatedStories = computed(() => {
+  const start = (currentPage.value - 1) * storiesPerPage;
+  const end = start + storiesPerPage;
+  return stories.value.slice(start, end);
+});
 
-    const userFetchData = async () => {
-      try {
-        // await authStore.fetchUserData();
-        const tokenid = localStorage.getItem("IDUSER");
-        const token = localStorage.getItem("TOKEN");
+const userFetchData = async () => {
+  try {
+    // await authStore.fetchUserData();
+    const tokenid = localStorage.getItem("IDUSER");
+    const token = localStorage.getItem("TOKEN");
 
-        const response = await axios.get(`${ngrokUrl}/api/user/${tokenid}`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-            "Authorization": `Bearer ${token}`, // Add Sanctum Token
-            "Accept": "application/json",
-          },
-        });
-
-        // console.log(response.data.data);
-
-        user.value = response.data.data || {};
-        formData.value.name = user.value.name || "";
-        formData.value.email = user.value.email || "";
-        formData.value.about = user.value.about || "";
-        formData.value.image = user.value.image || "";
-        Cookies.set("user", JSON.stringify(user.value));
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        user.value = {};
-        formData.value.name = "";
-        formData.value.email = "";
-        formData.value.about = "";
-        formData.value.image = "";
-      }
-    };
-
-    const fetchUserStories = async () => {
-      try {
-        const token = localStorage.getItem("TOKEN");
-
-        const response = await axios.get(`${ngrokUrl}/api/stories/my-stories`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-            "Authorization": `Bearer ${token}`, // Add Sanctum Token
-            "Accept": "application/json",
-          },
-        });
-
-        console.log(response.data)
-
-        const apiStories = response.data.data;
-        const userInfo = response.data.user;
-
-        stories.value = apiStories.map((story) => ({
-          id: story.id,
-          title: story.title,
-          content: story.content,
-          created_at: story.created_at,
-          content_images: story.content_images,
-          user: {
-            id: userInfo.id,
-            name: userInfo.name,
-            username: userInfo.username,
-            email: userInfo.email,
-            image: userInfo.image,
-            about: userInfo.about,
-          },
-        }));
-
-        console.log("User Stories:", stories.value);
-      } catch (error) {
-        console.error("Error fetching user stories:", error);
-      }
-    };
-
-    const formatDate = (dateString) => {
-      const options = { year: "numeric", month: "long", day: "numeric" };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    };
-
-    onMounted(async () => {
-      await userFetchData();
-      await fetchUserStories();
+    const response = await axios.get(`${ngrokUrl}/api/user/${tokenid}`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+        Authorization: `Bearer ${token}`, // Add Sanctum Token
+        Accept: "application/json",
+      },
     });
 
-    const openModal = () => {
-      isModalOpen.value = true;
-    };
+    // console.log(response.data.data);
 
-    const closeModal = () => {
-      isModalOpen.value = false;
-    };
-
-    const selectFile = () => {
-      document.querySelector("input[type=file]").click();
-    };
-
-    const onFileChange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        formData.value.image = file;
-      }
-    };
-
-    const updateProfile = async () => {
-      try {
-        const updatedData = {
-          name: formData.value.name,
-          email: formData.value.email,
-          about: formData.value.about,
-        };
-
-        await authStore.updateProfile(updatedData);
-
-        if (formData.value.image) {
-          const formDataImage = new FormData();
-          formDataImage.append("image", formData.value.image);
-          await authStore.updateImage(formDataImage);
-        }
-
-        if (
-          formData.value.newPassword &&
-          formData.value.newPassword === formData.value.confirmPassword
-        ) {
-          const passwordData = {
-            old_password: formData.value.oldPassword,
-            new_password: formData.value.newPassword,
-            confirm_password: formData.value.confirmPassword,
-          };
-          await authStore.changePassword(passwordData);
-        }
-
-        await userFetchData();
-        await fetchUserStories();
-        closeModal();
-        location.reload();
-      } catch (error) {
-        console.error("Error updating profile:", error);
-      }
-    };
-
-    const showMyStory = () => {
-      isMyStory.value = true;
-    };
-
-    const showBookmark = () => {
-      isMyStory.value = false;
-    };
-
-    const nextPage = () => {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
-    };
-
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    };
-
-    return {
-      user,
-      isModalOpen,
-      formData,
-      stories,
-      openModal,
-      closeModal,
-      defaultImage,
-      imagePreview,
-      selectFile,
-      onFileChange,
-      updateProfile,
-      showMyStory,
-      showBookmark,
-      isMyStory,
-      formatDate,
-      paginatedStories,
-      totalPages,
-      currentPage,
-      nextPage,
-      prevPage,
-      ngrokUrl,
-    };
-  },
+    user.value = response.data.data || {};
+    formData.value.name = user.value.name || "";
+    formData.value.email = user.value.email || "";
+    formData.value.about = user.value.about || "";
+    formData.value.image = user.value.image || "";
+    Cookies.set("user", JSON.stringify(user.value));
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    user.value = {};
+    formData.value.name = "";
+    formData.value.email = "";
+    formData.value.about = "";
+    formData.value.image = "";
+  }
 };
+
+const fetchUserStories = async () => {
+  loading.value = true;
+  try {
+    const token = localStorage.getItem("TOKEN");
+
+    const response = await axios.get(`${ngrokUrl}/api/stories/my-stories?page=${page.value}`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+        Authorization: `Bearer ${token}`, // Add Sanctum Token
+        Accept: "application/json",
+      },
+    });
+
+    stories.value = response.data.data.data;
+
+    console.log("User Stories:", response.data.data);
+  } catch (error) {
+    console.error("Error fetching user stories:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const formatDate = (dateString) => {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
+onMounted(async () => {
+  await userFetchData();
+  await fetchUserStories();
+});
+
+const openModal = () => {
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+const selectFile = () => {
+  document.querySelector("input[type=file]").click();
+};
+
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    formData.value.image = file;
+  }
+};
+
+const updateProfile = async () => {
+  try {
+    const updatedData = {
+      name: formData.value.name,
+      email: formData.value.email,
+      about: formData.value.about,
+    };
+
+    await authStore.updateProfile(updatedData);
+
+    if (formData.value.image) {
+      const formDataImage = new FormData();
+      formDataImage.append("image", formData.value.image);
+      await authStore.updateImage(formDataImage);
+    }
+
+    if (
+      formData.value.newPassword &&
+      formData.value.newPassword === formData.value.confirmPassword
+    ) {
+      const passwordData = {
+        old_password: formData.value.oldPassword,
+        new_password: formData.value.newPassword,
+        confirm_password: formData.value.confirmPassword,
+      };
+      await authStore.changePassword(passwordData);
+    }
+
+    await userFetchData();
+    await fetchUserStories();
+    closeModal();
+    location.reload();
+  } catch (error) {
+    console.error("Error updating profile:", error);
+  }
+};
+
+const showMyStory = () => {
+  isMyStory.value = true;
+};
+
+const showBookmark = () => {
+  isMyStory.value = false;
+};
+
+const nextPage = () => {
+  if (page.value) {
+    page.value++;
+  }
+  console.log(page.value)
+};
+
+const prevPage = () => {
+  if (page.value > 1) {
+    page.value--;
+  }
+  console.log(page.value)
+
+};
+
+watch(() => {
+  if(page.value) {
+    fetchUserStories()
+  }
+})
 </script>
 
 <style scoped>

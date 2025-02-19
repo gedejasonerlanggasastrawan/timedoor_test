@@ -55,7 +55,10 @@
       <section class="similar-stories mt-5">
         <h2 class="fontPlayfair">Similar Stories</h2>
         <hr class="my-5" />
-        <div class="d-flex flex-wrap"  v-if="Array.isArray(dataall_) && dataall_.length > 0">
+        <div
+          class="d-flex flex-wrap"
+          v-if="Array.isArray(dataall_) && dataall_.length > 0"
+        >
           <CardLatest
             v-for="(item, index) in dataall_"
             :key="index"
@@ -69,9 +72,7 @@
             class="mb-5"
           />
         </div>
-        <div v-else>
-          Loading...
-        </div>
+        <div v-else>Loading...</div>
       </section>
     </main>
 
@@ -80,114 +81,80 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import imageSrc from "../asset/home/test.jpg"; // Adjust the path as necessary
 import profilePic from "../asset/home/test.jpg"; // Use the specified profile picture
 import CardLatest from "~/components/CardLatest.vue";
 import { ngrokUrl } from "@/store/ngrokConfig";
 import axios from "axios";
 
-export default {
-  name: "DetailPage",
-  components: { CardLatest },
-  setup() {
-    const data_ = ref([]);
-    const dataall_ = ref([]);
-    const route = useRoute();
+const data_ = ref([]);
+const dataall_ = ref([]);
+const route = useRoute();
 
-    // Fetch detail
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories/${route.params.id}`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        data_.value = response.data.story; // Access the nested data array
-        console.log("--data---");
-        console.log(data_.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    // Fetch All
-    const fetchAll = async () => {
-      try {
-        const response = await axios.get(`${ngrokUrl}/api/stories`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        });
-        dataall_.value = response.data.stories.data; // Access the nested data array
-        console.log("--data---");
-        console.log(dataall_.value);
-      } catch (error) {
-        console.error("Error fetching latest stories:", error);
-      }
-    };
-
-    onMounted(async () => {
-      await fetchData();
-      await fetchAll();
+// Fetch detail
+const fetchData = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories/${route.params.id}`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
     });
-
-    return {
-      data_,
-      dataall_,
-      ngrokUrl,
-    };
-  },
-  data() {
-    return {
-      //   title: "Guardians of the Galaxy Vol. 3",
-      //   date: "15 May 2023",
-      //   author: "By Juliana Putra",
-      //   imageSrc: imageSrc,
-      //   profilePic: profilePic, // Using the specified profile picture
-      //   content: [
-      //     "At their new headquarters on Knowhere, the Guardians of the Galaxy are attacked by Adam Warlock, a Sovereign warrior created by the High Evolutionary. Adam discovers the Guardians dramatically need Rocket, who is injured on Nebula's ship. The Guardians are unable to find Rocket's whereabouts and, as a last resort, made by the company Orgosphere, embarks on him. They travel to Orgosphere headquarters to find the elusive code.",
-      //     "As Rocket is unconscious, he recalls his past. As a baby raccoon, he was experimented on by the High Evolutionary, a scientist who exploits his science and technological capabilities to create a Counter-Earth. Rocket befriends the High Evolutionary's other subjects, including the walrus Teefs and the rabbit Floor. The High Evolutionary is impressed by Rocket's intelligence but treats the other subjects harshly. Rocket finally tries to escape with his friends, but the High Evolutionary orders them to be exterminated and his friends are enhanced. Rocket finally tries to go to the High Evolutionary to take his place instead.",
-      //     "In the present, the abominable version of Gamora (who has joined the Ravagers) helps the Guardians infiltrate Orgosphere. They retrieve Rocket, but discover that the code has been removed. The group speculates that the one of the High Evolutionary's previous locks is to key discover Counter-Earth. They are followed by the previous villain, who ordered for their capture.",
-      //     "Upon arriving, the residents implore to find the High Evolutionary's ship. One of Rocket's friends remains with Gamora and Rocket's friend, Peter Quill, and Nebula must find the High Evolutionary's ship. Nebula is tasked to send out a distress signal to get help from the Guardians.",
-      //     "The High Evolutionary initiates the destruction of Counter-Earth, which will kill all of the planets, including Earth. As the ship enters orbit, Quill and Groot begin to find the interesting ship to destroy the Guardians' ship. They are joined by Rocket, Nebula, and Adam Warlock, who is now a member of the Guardians.",
-      //     "Meanwhile, Peter Quill once more reunites with his estranged children on Earth before being interrupted by the Guardians. They are tasked to save the universe from the High Evolutionary's plans. In the aftermath, Quill vows the Guardians, becoming the capacity to travel back to Earth to reunite with his grandfather Jason. Nebula embarks on a journey of self-discovery with the Abilisk. Gamora reunites with the Ravagers, and Nebula finds a new sense of purpose. The Guardians, consisting of Rocket, Groot, Cosmo, Kraglin, Adam, (who is rescued children), and Adam's pet Blurp, take on a new mission in space while Quill's grandfather visits Jason.",
-      //   ],
-      //   imageGrid: [imageSrc, imageSrc, imageSrc, imageSrc],
-      //   similarStories: [
-      //     {
-      //       title: "Harry Potter and the Philosopher’s Stone",
-      //       description:
-      //         "Harry Potter and the Philosopher’s Stone is a fantasy novel written by British author J.K. Rowling.",
-      //       userName: "Kim Jong In",
-      //       createdAt: "14 July 2023",
-      //       category: "Romance",
-      //     },
-      //     {
-      //       title: "Spring in London",
-      //       description: "A story about love and adventure in the vibrant city of London.",
-      //       userName: "Kim Jong In",
-      //       createdAt: "05 July 2023",
-      //       category: "Drama",
-      //     },
-      //     {
-      //       title: "Autumn in Paris",
-      //       description:
-      //         "A romantic tale set against the backdrop of beautiful Paris in autumn.",
-      //       userName: "Kim Jong In",
-      //       createdAt: "05 July 2023",
-      //       category: "Romance",
-      //     },
-      //   ],
-    };
-  },
-  methods: {
-    bookmarkStory() {
-      // Logic to handle bookmarking the story
-      alert("Story bookmarked!");
-    },
-  },
+    data_.value = response.data.story; // Access the nested data array
+    console.log("--data---");
+    console.log(data_.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
 };
+
+// Fetch All
+const fetchAll = async () => {
+  try {
+    const response = await axios.get(`${ngrokUrl}/api/stories`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+      },
+    });
+    dataall_.value = response.data.stories.data; // Access the nested data array
+    console.log("--data---");
+    console.log(dataall_.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+};
+
+onMounted(async () => {
+  await fetchData();
+  await fetchAll();
+});
+
+const bookmarkStory = async () => {
+  const token = localStorage.getItem("TOKEN");
+  const formData = new FormData();
+
+  formData.append("story_id", route.params.id);
+
+  try {
+    const response = await axios.post(`${ngrokUrl}/api/bookmarks`, formData, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+        "Authorization": `Bearer ${token}`, // Add Sanctum Token
+        "Accept": "application/json",
+      },
+      method: "POST",
+    });
+    // comedies.value = response.data.data.data; // Access the nested data array
+    // console.log("--data---");
+    // console.log(comedies.value);
+  } catch (error) {
+    console.error("Error fetching latest stories:", error);
+  }
+
+  // Show success message
+  alert("Bookmark Successfully!");
+
+}
 </script>
 
 <style scoped>
@@ -300,7 +267,7 @@ export default {
   content: "";
   width: 55%; /* Adjust size */
   height: 55%; /* Adjust size */
-  background-image: url("../asset/icon/iconBookmark.png"); /* Path to your icon */
+  background-image: url("../../asset/icon/iconBookmark.png"); /* Path to your icon */
   background-size: cover; /* Cover the entire area */
 }
 

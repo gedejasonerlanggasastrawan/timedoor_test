@@ -1,4 +1,4 @@
 // ngrokConfig.js
 export const ngrokUrl =
-  "https://12ed-2001-448a-5070-246c-992f-d4fb-87d3-6870.ngrok-free.app";
+  "https://8243-2404-c0-3827-450e-e43b-5c8f-3eda-3999.ngrok-free.app";
 // export const ngrokUrl = "http://127.0.0.1:8000";

@@ -162,7 +162,7 @@ export default {
 
         const authStore = useAuthStore();
         const formData = new FormData();
-        const token = Cookies.get("TOKEN");
+        const token = localStorage.getItem("TOKEN");
 
         formData.append("title", this.title);
         formData.append("category_id", this.selectedCategory);
@@ -189,7 +189,7 @@ export default {
             },
             method: "POST",
           });
-          comedies.value = response.data.data.data; // Access the nested data array
+          // comedies.value = response.data.data.data; // Access the nested data array
           // console.log("--data---");
           // console.log(comedies.value);
         } catch (error) {

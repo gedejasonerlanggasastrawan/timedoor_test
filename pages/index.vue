@@ -38,6 +38,7 @@
       <div class="stories-grid" v-if="Array.isArray(stories) && stories.length > 0">
         <CardLatest
           v-for="(story, index) in stories"
+          :id="story.id"
           :key="index"
           :imageSrc="`${ngrokUrl}/storage/${story.images[0].image_path}`"
           :profilePic="`${ngrokUrl}/storage/${story.users.profile_image}`"
@@ -67,6 +68,7 @@
         <div class="col-lg-8 col-md-6">
           <CardBig
             v-for="(comedy, index) in comedies.slice(0, 1)"
+            :id="comedy.id"
             :key="index"
             :imageSrc="`${ngrokUrl}/storage/${comedy.images[0].image_path}`"
             :profilePic="`${ngrokUrl}/storage/${comedy.users.profile_image}`"
@@ -81,6 +83,7 @@
           <div class="d-flex flex-column">
             <CardSmall
               v-for="(comedy, index) in comedies.slice(1, 3)"
+              :id="comedy.id"
               :key="index"
               :imageSrc="`${ngrokUrl}/storage/${comedy.images[0].image_path}`"
               :profilePic="`${ngrokUrl}/storage/${comedy.users.profile_image}`"
@@ -116,6 +119,7 @@
           v-if="Array.isArray(romances) && romances.length > 0"
         >
           <Card
+            :id="romance.id"
             :imageSrc="`${ngrokUrl}/storage/${romance.images[0].image_path}`"
             :profilePic="`${ngrokUrl}/storage/${romance.users.profile_image}`"
             :title="romance.title"
@@ -144,6 +148,7 @@
         <div class="col-lg-8 col-md-6">
           <CardBig
             v-for="(horror, index) in horrors.slice(0, 1)"
+            :id="horror.id"
             :key="index"
             :imageSrc="`${ngrokUrl}/storage/${horror.images[0].image_path}`"
             :profilePic="`${ngrokUrl}/storage/${horror.users.profile_image}`"
@@ -158,6 +163,7 @@
           <div class="d-flex flex-column">
             <CardSmall
               v-for="(horror, index) in horrors.slice(1, 3)"
+              :id="horror.id"
               :key="index"
               :imageSrc="`${ngrokUrl}/storage/${horror.images[0].image_path}`"
               :profilePic="`${ngrokUrl}/storage/${horror.users.profile_image}`"
@@ -329,7 +335,6 @@ const showSuccessModal = () => {
   }, 10000);
 };
 
-
 const goToSearchPage = () => {
   if (searchquery.value.trim()) {
     router.push(`/allstory?searchquery=${encodeURIComponent(searchquery.value)}`);
@@ -347,8 +352,8 @@ onMounted(async () => {
 });
 
 watch(() => {
-  console.log('user search query : ' + searchquery.value)
-})
+  console.log("user search query : " + searchquery.value);
+});
 
 const closeLoginModal = () => {
   showLoginModal.value = false;

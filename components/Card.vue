@@ -1,5 +1,5 @@
 <template>        
-  <div class="d-flex">        
+  <NuxtLink :href=" '/detail/' + id" class="d-flex">        
     <div class="card fontDmSans">        
       <div class="image-container">        
         <img :src="imageSrc" class="card-img-top card-image" alt="..." />        
@@ -21,12 +21,16 @@
         </div>        
       </div>        
     </div>        
-  </div>        
+  </NuxtLink>        
 </template>        
     
 <script>      
 export default {      
   props: {      
+    id: {
+      type: String,
+      required: true
+    },
     imageSrc: {      
       type: String,      
       required: true,      
@@ -59,7 +63,10 @@ export default {
 };      
 </script>      
       
-<style scoped>      
+<style scoped>    
+a {
+  text-decoration: none;
+}   
 .fontPlayfair {    
   font-family: playfair-display, serif;    
 }    
