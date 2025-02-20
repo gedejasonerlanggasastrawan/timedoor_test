@@ -1,4 +1,7 @@
 <template>
+  <Notif v-if="logoutStatus" message="You have successfully logout." />
+  <Loading v-if="loadingStatus"/>
+
   <nav class="navbar navbar-expand-lg bg-white p-3 sticky-top">
     <div class="container">
       <!-- Logo -->
@@ -63,101 +66,104 @@
   </nav>
 </template>
 
-<script>
+<script setup>
 import { useAuthStore } from "@/store/auth";
 import defaultImage from "@/asset/icon/User.png"; // Import default image
-import { ref, computed } from "vue"; // Import ref and computed
+import { ref, computed, watch } from "vue"; // Import ref and computed
 import { useRouter } from "vue-router"; // Import useRouter
 import Cookies from "js-cookie"; // Import js-cookie for cookie management
 import axios from "axios";
 import { ngrokUrl } from "@/store/ngrokConfig";
+import { useRoute } from "vue-router";
 
-export default {
-  setup() {
-    const authStore = useAuthStore();
-    const isLogoutModalOpen = ref(false); // State for logout modal
-    const router = useRouter(); // Initialize router
+const loadingStatus = ref(false)
+const route = useRoute();
+const logoutStatus = ref(false);
+const authStore = useAuthStore();
+const isLogoutModalOpen = ref(false); // State for logout modal
+const router = useRouter(); // Initialize router
 
-    // Reactive property for login status
-    const isLoggedIn = computed(() => {
-      // return Cookies.get('isLoggedIn') === 'true';
-      // return true;
-      const token = localStorage.getItem("TOKEN"); // Save token to localStorage
-      if(token) {
-        return true;
-      }
-    });
+// Reactive property for login status
+const isLoggedIn = computed(() => {
+  // return Cookies.get('isLoggedIn') === 'true';
+  // return true;
+  const token = localStorage.getItem("TOKEN"); // Save token to localStorage
+  if (token) {
+    return true;
+  }
+});
 
-    // Function to get user data from cookies
+// Function to get user data from cookies
 
-    const user = ref({});
-    // const getUserData = async () => {
-    //   await authStore.fetchUserData();
-    //   console.log("yui", authStore.user);
-    //   user.value = authStore.user;
-    // };
-    // Get user data from cookies
-    // getUserData();
+const user = ref({});
+// const getUserData = async () => {
+//   await authStore.fetchUserData();
+//   console.log("yui", authStore.user);
+//   user.value = authStore.user;
+// };
+// Get user data from cookies
+// getUserData();
 
-    const openLogoutModal = () => {
-      isLogoutModalOpen.value = true; // Show logout modal
-    };
-
-    const closeLogoutModal = () => {
-      isLogoutModalOpen.value = false; // Close logout modal
-    };
-
-    const userFetchData = async () => {
-      try {
-        // await authStore.fetchUserData();
-        const tokenid = localStorage.getItem("IDUSER");
-        const token = localStorage.getItem("TOKEN");
-
-        const response = await axios.get(`${ngrokUrl}/api/user/${tokenid}`, {
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-            "Authorization": `Bearer ${token}`, // Add Sanctum Token
-            "Accept": "application/json",
-          },
-        });
-
-        // console.log(response.data.data);
-
-        user.value = response.data.data || {};
-        // formData.value.name = user.value.name || "";
-        // formData.value.email = user.value.email || "";
-        // formData.value.about = user.value.about || "";
-        // formData.value.image = user.value.image || "";
-        Cookies.set("user", JSON.stringify(user.value));
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    const logout = async () => {
-      localStorage.removeItem("TOKEN");
-      localStorage.removeItem("IDUSER");
-
-      console.log('See You!')
-
-      router.push('/x')
-    };
-
-    onMounted(async () => {
-      await userFetchData();
-    });
-
-    return {
-      user,
-      logout,
-      defaultImage,
-      isLogoutModalOpen,
-      openLogoutModal,
-      closeLogoutModal,
-      isLoggedIn, // Return the computed property for login status
-    };
-  },
+const openLogoutModal = () => {
+  isLogoutModalOpen.value = true; // Show logout modal
 };
+
+const closeLogoutModal = () => {
+  isLogoutModalOpen.value = false; // Close logout modal
+};
+
+const userFetchData = async () => {
+  try {
+    // await authStore.fetchUserData();
+    const tokenid = localStorage.getItem("IDUSER");
+    const token = localStorage.getItem("TOKEN");
+
+    const response = await axios.get(`${ngrokUrl}/api/user/${tokenid}`, {
+      headers: {
+        "ngrok-skip-browser-warning": "69420",
+        Authorization: `Bearer ${token}`, // Add Sanctum Token
+        Accept: "application/json",
+      },
+    });
+
+    // console.log(response.data.data);
+
+    user.value = response.data.data || {};
+    // formData.value.name = user.value.name || "";
+    // formData.value.email = user.value.email || "";
+    // formData.value.about = user.value.about || "";
+    // formData.value.image = user.value.image || "";
+    Cookies.set("user", JSON.stringify(user.value));
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+};
+
+const logout = async () => {
+
+  loadingStatus.value = true;
+  setTimeout(() => {
+    localStorage.removeItem("TOKEN");
+    localStorage.removeItem("IDUSER");
+    
+    router.push("/?logoutStatus=true");
+
+    loadingStatus.value = false;
+  }, 1000)
+};
+
+onMounted(async () => {
+  await userFetchData();
+
+  // Ambil nilai dari query dan pastikan konversi ke boolean
+  logoutStatus.value = route.query.logoutStatus === "true";
+
+  if (logoutStatus.value) {
+    setTimeout(() => {
+      logoutStatus.value = false;
+    }, 3000);
+  }
+});
 </script>
 
 <style scoped>

@@ -1,5 +1,7 @@
 <template>
   <Header />
+  <Notif v-if="loginStatus" message="You have successfully logged in."/>
+
   <div class="profile-container">
     <div class="profile-header">
       <div class="profile-image-awal col-md-4">
@@ -182,7 +184,9 @@ import defaultImage from "@/asset/icon/User.png";
 import Cookies from "js-cookie";
 import CardUser from "~/components/CardUser.vue";
 import { ngrokUrl } from "@/store/ngrokConfig";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const authStore = useAuthStore();
 const user = ref({});
 const isModalOpen = ref(false);
@@ -202,6 +206,7 @@ const formData = ref({
 const currentPage = ref(1);
 const storiesPerPage = 4;
 const bookmarks = ref([]);
+const loginStatus = ref(false);
 
 const imagePreview = computed(() => {
   if (formData.value.image && formData.value.image instanceof File) {
@@ -356,16 +361,6 @@ const updateProfile = async () => {
         method: "POST",
       });
 
-      // const response2 = await axios.post(`${ngrokUrl}/api/edit-profile-image`, updatedData, {
-      //   headers: {
-      //     "ngrok-skip-browser-warning": "69420",
-      //     "Authorization": `Bearer ${token}`, // Add Sanctum Token
-      //     "Accept": "application/json",
-      //     "Content-Type": "multipart/form-data"
-      //   },
-      //   method: "POST",
-      // });
-
       console.log("---- data ----");
       // comedies.value = response.data.data.data; // Access the nested data array
       console.log(response.data);
@@ -409,6 +404,17 @@ watch(() => {
   if (page.value) {
     fetchUserStories();
     fetchUserBookmarks();
+  }
+});
+
+onMounted(() => {
+  // Ambil nilai dari query dan pastikan konversi ke boolean
+  loginStatus.value = route.query.loginstatus === "true";
+
+  if (loginStatus.value) {
+    setTimeout(() => {
+      loginStatus.value = false;
+    }, 3000);
   }
 });
 </script>

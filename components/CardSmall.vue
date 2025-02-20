@@ -15,54 +15,40 @@
               <p class="mb-0 fontDmSans">{{ userName }}</p>      
             </div>      
             <div class="d-flex align-items-center">      
-              <p class="mb-0 fontDmSans">{{ createdAt }}</p>            
+              <p class="mb-0 fontDmSans">{{ formattedDate(createdAt) }}</p>            
             </div>      
           </div>      
         </div>      
       </div>      
     </div>      
   </NuxtLink>      
-</template>      
-      
-<script>      
-export default {      
-  props: {      
-    imageSrc: {      
-      type: String,      
-      required: true,      
-    },      
-    profilePic: {      
-      type: String,      
-      required: true,      
-    },      
-    title: {      
-      type: String,      
-      required: true,      
-    },      
-    description: {      
-      type: String,      
-      required: true,      
-    },      
-    userName: {      
-      type: String,      
-      required: true,      
-    },      
-    createdAt: {      
-      type: String,      
-      required: true,      
-    },      
-    category: {      
-      type: String,      
-      required: true,      
-    },    
-    id: {
-      type: String,
-      required: true
-    }  
-  },      
-};      
-</script>      
-      
+</template>   
+
+<script setup>
+import { defineProps, computed } from "vue";
+
+const props = defineProps({
+  imageSrc: { type: String, required: true },
+  profilePic: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  userName: { type: String, required: true },
+  createdAt: { type: String, required: true },
+  category: { type: String, required: true },
+  id: { type: String, required: true },
+});
+
+// Format createdAt to "Month, DD YYYY"
+const formattedDate = () => {
+  const date = new Date(props.createdAt);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+  });
+};
+</script>
+
 <style scoped>     
 a {
   text-decoration: none;

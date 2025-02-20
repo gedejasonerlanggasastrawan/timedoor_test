@@ -1,5 +1,7 @@
 <template>
   <div>
+    <Loading v-if="loadingStatus" />
+    <Notif v-if="notifBookmark" message="Saved Bookmark!" />
     <Header></Header>
 
     <!-- Breadcrumb Navigation -->
@@ -7,14 +9,14 @@
       <a href="/" class="breadcrumb-item"><span>Home</span></a>
       <span class="breadcrumb-separator">/</span>
       <a href="allStory" class="breadcrumb-item"
-        ><span>{{ data_.title }}</span></a
-      >
+        ><span>{{ data_.title }}</span>
+      </a>
     </nav>
 
     <main class="detail-page container" v-if="data_.title">
       <article class="detail-content">
         <div class="detail-header">
-          <p class="date fontDmSans">{{ data_.created_at }}</p>
+          <p class="date fontDmSans">{{ formatDate(data_.created_at) }}</p>
           <h1 class="title my-5 fontPlayfair">{{ data_.title }}</h1>
           <div class="author-info mb-5">
             <img
@@ -88,12 +90,23 @@ import CardLatest from "~/components/CardLatest.vue";
 import { ngrokUrl } from "@/store/ngrokConfig";
 import axios from "axios";
 
+const notifBookmark = ref(false);
 const data_ = ref([]);
 const dataall_ = ref([]);
 const route = useRoute();
+const loadingStatus = ref(false);
+
+// format date
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  const options = { year: "numeric", month: "long", day: "2-digit" };
+  return date.toLocaleDateString("en-US", options);
+}
 
 // Fetch detail
 const fetchData = async () => {
+  loadingStatus.value = true;
+
   try {
     const response = await axios.get(`${ngrokUrl}/api/stories/${route.params.id}`, {
       headers: {
@@ -105,11 +118,14 @@ const fetchData = async () => {
     console.log(data_.value);
   } catch (error) {
     console.error("Error fetching latest stories:", error);
+  } finally {
+    loadingStatus.value = false;
   }
 };
 
 // Fetch All
 const fetchAll = async () => {
+  loadingStatus.value = true;
   try {
     const response = await axios.get(`${ngrokUrl}/api/stories`, {
       headers: {
@@ -121,6 +137,8 @@ const fetchAll = async () => {
     console.log(dataall_.value);
   } catch (error) {
     console.error("Error fetching latest stories:", error);
+  } finally {
+    loadingStatus.value = false;
   }
 };
 
@@ -135,26 +153,41 @@ const bookmarkStory = async () => {
 
   formData.append("story_id", route.params.id);
 
-  try {
-    const response = await axios.post(`${ngrokUrl}/api/bookmarks`, formData, {
-      headers: {
-        "ngrok-skip-browser-warning": "69420",
-        "Authorization": `Bearer ${token}`, // Add Sanctum Token
-        "Accept": "application/json",
-      },
-      method: "POST",
-    });
-    // comedies.value = response.data.data.data; // Access the nested data array
-    // console.log("--data---");
-    // console.log(comedies.value);
-  } catch (error) {
-    console.error("Error fetching latest stories:", error);
+  // check login
+  if (token) {
+
+    loadingStatus.value = true;
+
+    try {
+      const response = await axios.post(`${ngrokUrl}/api/bookmarks`, formData, {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          Authorization: `Bearer ${token}`, // Add Sanctum Token
+          Accept: "application/json",
+        },
+        method: "POST",
+      });
+      // comedies.value = response.data.data.data; // Access the nested data array
+      // console.log("--data---");
+      // console.log(comedies.value);
+      
+      setTimeout(() => {
+        notifBookmark.value = true;
+      }, 1000);
+
+    } catch (error) {
+      console.error("Error fetching latest stories:", error);
+    } finally {
+      loadingStatus.value = false;
+    }
+
+  } else {
+    alert('please login before..')
   }
 
   // Show success message
-  alert("Bookmark Successfully!");
-
-}
+  // alert("Bookmark Successfully!");
+};
 </script>
 
 <style scoped>

@@ -1,4 +1,5 @@
 <template>
+  <Loading v-if="loadingStatus"/>
   <div class="register-container container-fluid">
     <div class="info-section px-5">
       <nuxt-link to="/">
@@ -99,131 +100,122 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import { useAuthStore } from "../store/auth";
 import { useRouter } from "vue-router";
 import { ngrokUrl } from "@/store/ngrokConfig";
 import axios from "axios";
 
-export default {
-  setup() {
-    const authStore = useAuthStore();
-    const router = useRouter();
+const loadingStatus = ref(false);
+const authStore = useAuthStore();
+const router = useRouter();
 
-    const form = ref({
-      name: "",
-      username: "",
-      email: "",
-      password: "",
-      confirm_password: "",
-    });
+const form = ref({
+  name: "",
+  username: "",
+  email: "",
+  password: "",
+  confirm_password: "",
+});
 
-    const error = ref(null);
-    const passwordClass = ref("");
-    const confirmPasswordClass = ref("");
+const error = ref(null);
+const passwordClass = ref("");
+const confirmPasswordClass = ref("");
 
-    const validatePassword = () => {
-      passwordClass.value =
-        form.value.password.length >= 8 ? "border-success" : "border-danger";
-    };
-
-    const validateConfirmPassword = () => {
-      confirmPasswordClass.value =
-        form.value.password === form.value.confirm_password && form.value.confirm_password
-          ? "border-success"
-          : "border-danger";
-    };
-
-    const createAccount = async () => {
-      error.value = null;
-
-      if (form.value.password.length < 8) {
-        error.value = "Password must be at least 8 characters long.";
-        return;
-      }
-
-      if (form.value.password !== form.value.confirm_password) {
-        error.value = "Passwords do not match!";
-        return;
-      }
-
-      // try {
-      //   await authStore.registerUser(form.value);
-      //   // router.push("/");
-      // } catch (err) {
-      //   error.value = err.message || "Registration failed";
-      // }
-      try {
-        const data = {
-          name: form.value.name,
-          username: form.value.username,
-          email: form.value.email,
-          password: form.value.password,
-          confirm_password: form.value.confirm_password, // Sesuaikan key jika berbeda
-        };
-
-        console.log("Data to send:", data);
-
-        const response = await axios.post(
-          `${ngrokUrl}/api/register`,
-          data, // Perbaiki pemisahan parameter
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "69420",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        console.log("Response:", response.data);
-        router.push("/login"); // Arahkan ke halaman index setelah login berhasil
-      } catch (error) {
-        console.error("Error submitting form:", error);
-      }
-    };
-
-    // const handleSubmit = async () => {
-    //   try {
-    //     const data = {
-    //       name: form.value.name,
-    //       username: form.value.username,
-    //       email: form.value.email,
-    //       password: form.value.password,
-    //       confirm_password: form.value.confirm_password, // Sesuaikan key jika berbeda
-    //     };
-
-    //     console.log("Data to send:", data);
-
-    //     const response = await axios.post(
-    //       `${ngrokUrl}/api/register`,
-    //       data, // Perbaiki pemisahan parameter
-    //       {
-    //         headers: {
-    //           "ngrok-skip-browser-warning": "69420",
-    //           "Content-Type": "application/json",
-    //         },
-    //       }
-    //     );
-
-    //     console.log("Response:", response.data);
-    //     router.push("/login"); // Arahkan ke halaman index setelah login berhasil
-    //   } catch (error) {
-    //     console.error("Error submitting form:", error);
-    //   }
-    // };
-
-    return {
-      form,
-      error,
-      passwordClass,
-      confirmPasswordClass,
-      validatePassword,
-      validateConfirmPassword,
-      createAccount,
-    };
-  },
+const validatePassword = () => {
+  passwordClass.value =
+    form.value.password.length >= 8 ? "border-success" : "border-danger";
 };
+
+const validateConfirmPassword = () => {
+  confirmPasswordClass.value =
+    form.value.password === form.value.confirm_password && form.value.confirm_password
+      ? "border-success"
+      : "border-danger";
+};
+
+const createAccount = async () => {
+  error.value = null;
+
+  if (form.value.password.length < 8) {
+    error.value = "Password must be at least 8 characters long.";
+    return;
+  }
+
+  if (form.value.password !== form.value.confirm_password) {
+    error.value = "Passwords do not match!";
+    return;
+  }
+
+  // try {
+  //   await authStore.registerUser(form.value);
+  //   // router.push("/");
+  // } catch (err) {
+  //   error.value = err.message || "Registration failed";
+  // }
+  loadingStatus.value = true;
+
+  try {
+    const data = {
+      name: form.value.name,
+      username: form.value.username,
+      email: form.value.email,
+      password: form.value.password,
+      confirm_password: form.value.confirm_password, // Sesuaikan key jika berbeda
+    };
+
+    console.log("Data to send:", data);
+
+    const response = await axios.post(
+      `${ngrokUrl}/api/register`,
+      data, // Perbaiki pemisahan parameter
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Response:", response.data);
+    router.push("/login"); // Arahkan ke halaman index setelah login berhasil
+  } catch (error) {
+    console.error("Error submitting form:", error);
+  } finally {
+    loadingStatus.value = false
+  }
+};
+
+// const handleSubmit = async () => {
+//   try {
+//     const data = {
+//       name: form.value.name,
+//       username: form.value.username,
+//       email: form.value.email,
+//       password: form.value.password,
+//       confirm_password: form.value.confirm_password, // Sesuaikan key jika berbeda
+//     };
+
+//     console.log("Data to send:", data);
+
+//     const response = await axios.post(
+//       `${ngrokUrl}/api/register`,
+//       data, // Perbaiki pemisahan parameter
+//       {
+//         headers: {
+//           "ngrok-skip-browser-warning": "69420",
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     console.log("Response:", response.data);
+//     router.push("/login"); // Arahkan ke halaman index setelah login berhasil
+//   } catch (error) {
+//     console.error("Error submitting form:", error);
+//   }
+// };
 </script>
 
 <style scoped>

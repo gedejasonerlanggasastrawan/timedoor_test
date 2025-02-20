@@ -15,7 +15,7 @@
               <p class="mb-0 fontDmSans">{{ userName }}</p>
             </div>
             <div class="d-flex align-items-center">
-              <p class="mb-0 me-2 fontDmSans">{{ createdAt }}</p>
+              <p class="mb-0 me-2 fontDmSans">{{ formattedDate(createdAt) }}</p>
               <div class="category">
                 <p class="mb-0 fontDmSans">{{ category }}</p>
               </div>
@@ -70,6 +70,16 @@ const props = defineProps({
     required: true,
   },
 });
+
+// Format createdAt to "Month, DD YYYY"
+const formattedDate = () => {
+  const date = new Date(props.createdAt);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+  });
+};
 
 const handleAction = async (id) => {
   try {

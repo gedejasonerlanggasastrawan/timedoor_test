@@ -1,4 +1,5 @@
 <template>
+  <Loading v-if="loadingStatus"/>
   <div class="login-container container-fluid">
     <div class="form-section">
       <nuxt-link to="/"> 
@@ -29,94 +30,91 @@
   </div>
 </template>
 
-<script>
+<script setup>  
 import { ref } from 'vue';
 import { useAuthStore } from '../store/auth'; // Mengimpor store Pinia
 import { useRouter } from 'vue-router'; // Mengimpor useRouter
 import { ngrokUrl } from "@/store/ngrokConfig";
 import axios from "axios";
 
-export default {
-  setup() {
-    const authStore = useAuthStore();
-    const router = useRouter(); // Menggunakan router
-    const form = ref({
-      identifier: '', // Mengganti username dengan identifier
-      password: ''
-    });
-    const error = ref(null); // Menyimpan pesan kesalahan
+const loadingStatus = ref(false)
+const authStore = useAuthStore();
+const router = useRouter(); // Menggunakan router
+const form = ref({
+  identifier: '', // Mengganti username dengan identifier
+  password: ''
+});
+const error = ref(null); // Menyimpan pesan kesalahan
 
-    const login = async () => {
-      try {
-        const data = {
-          username_or_email: form.value.identifier,
-          password: form.value.password,
-        };
+const login = async () => {
 
-        console.log("Data to send:", data);
+  loadingStatus.value = true;
 
-        const response = await axios.post(
-          `${ngrokUrl}/api/login`,
-          data, // Perbaiki pemisahan parameter
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "69420",
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  try {
+    const data = {
+      username_or_email: form.value.identifier,
+      password: form.value.password,
+    };
 
-        console.log("Response:", response.data);
-        const token = response.data.data.token; // Adjust based on API response
-        const iduser = response.data.data.user.id; // Adjust based on API response
+    console.log("Data to send:", data);
 
-
-        localStorage.setItem("TOKEN", token); // Save token to localStorage
-        localStorage.setItem("IDUSER", iduser); // Save token to localStorage
-
-
-        router.push('/profile'); // Arahkan ke halaman index setelah login berhasil
-
-      } catch (error) {
-        console.error("Error submitting form:", error);
+    const response = await axios.post(
+      `${ngrokUrl}/api/login`,
+      data, // Perbaiki pemisahan parameter
+      {
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+          "Content-Type": "application/json",
+        },
       }
-    };
+    );
 
-    // const handleSubmit = async () => {
-    //   try {
-    //     const data = {
-    //       username_or_email: form.value.identifier,
-    //       password: form.value.password,
-    //     };
+    console.log("Response:", response.data);
+    const token = response.data.data.token; // Adjust based on API response
+    const iduser = response.data.data.user.id; // Adjust based on API response
 
-    //     console.log("Data to send:", data);
 
-    //     const response = await axios.post(
-    //       `${ngrokUrl}/api/login`,
-    //       data, // Perbaiki pemisahan parameter
-    //       {
-    //         headers: {
-    //           "ngrok-skip-browser-warning": "69420",
-    //           "Content-Type": "application/json",
-    //         },
-    //       }
-    //     );
+    localStorage.setItem("TOKEN", token); // Save token to localStorage
+    localStorage.setItem("IDUSER", iduser); // Save token to localStorage
 
-    //     console.log("Response:", response.data);
-    //     router.push('/profile'); // Arahkan ke halaman index setelah login berhasil
 
-    //   } catch (error) {
-    //     console.error("Error submitting form:", error);
-    //   }
-    // };
+    router.push('/profile?loginstatus=true'); // Arahkan ke halaman index setelah login berhasil
 
-    return {
-      form,
-      error,
-      login
-    };
+  } catch (error) {
+    console.error("Error submitting form:", error);
+  } finally {
+    loadingStatus.value = false
   }
-}
+};
+
+// const handleSubmit = async () => {
+//   try {
+//     const data = {
+//       username_or_email: form.value.identifier,
+//       password: form.value.password,
+//     };
+
+//     console.log("Data to send:", data);
+
+//     const response = await axios.post(
+//       `${ngrokUrl}/api/login`,
+//       data, // Perbaiki pemisahan parameter
+//       {
+//         headers: {
+//           "ngrok-skip-browser-warning": "69420",
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     console.log("Response:", response.data);
+//     router.push('/profile'); // Arahkan ke halaman index setelah login berhasil
+
+//   } catch (error) {
+//     console.error("Error submitting form:", error);
+//   }
+// };
+
 </script>
 
 <style scoped>
