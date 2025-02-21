@@ -27,7 +27,7 @@
     <div class="latest-stories">
       <div class="latest-judul justify-content-between align-items-center">
         <h2 class="h2Judul">Latest Story</h2>
-        <nuxt-link class="d-flex explore text-decoration-none" to="/allStory">
+        <nuxt-link class="d-flex explore text-decoration-none" to="/allStory/">
           <p class="pExplore me-2">Explore More</p>
           <i class="fa-solid fa-arrow-right fs-3"></i>
         </nuxt-link>
@@ -56,10 +56,10 @@
     <div class="container-fluid comedy-section">
       <div class="comedy-judul justify-content-between align-items-center">
         <h2 class="h2Judul">Comedy</h2>
-        <div class="d-flex explore">
+        <NuxtLink class="d-flex explore" to="/allStory/1">
           <p class="pExplore me-2">Explore More</p>
           <i class="fa-solid fa-arrow-right fs-3"></i>
-        </div>
+        </NuxtLink>
       </div>
       <div class="custom-hr">
         <hr />
@@ -103,10 +103,10 @@
     <div class="romance-section">
       <div class="romance-judul justify-content-between align-items-center">
         <h2 class="h2Judul">Romance</h2>
-        <div class="d-flex explore">
+        <NuxtLink class="d-flex explore" to="/allStory/8">
           <p class="pExplore me-2">Explore More</p>
           <i class="fa-solid fa-arrow-right fs-3"></i>
-        </div>
+        </NuxtLink>
       </div>
       <div class="custom-hr">
         <hr />
@@ -136,10 +136,10 @@
     <div class="container-fluid horror-section">
       <div class="horror-judul justify-content-between align-items-center">
         <h2 class="h2Judul">Horror</h2>
-        <div class="d-flex explore">
+        <NuxtLink class="d-flex explore" to="/allStory/9">
           <p class="pExplore me-2">Explore More</p>
           <i class="fa-solid fa-arrow-right fs-3"></i>
-        </div>
+        </NuxtLink>
       </div>
       <div class="custom-hr">
         <hr />
@@ -186,12 +186,12 @@
         <hr />
       </div>
       <div class="categories-container">
-        <button class="category-button fontDmSans">Adventure</button>
-        <button class="category-button fontDmSans">Fiction</button>
-        <button class="category-button fontDmSans">Fantasy</button>
-        <button class="category-button fontDmSans">Drama</button>
-        <button class="category-button fontDmSans">Heartfelt</button>
-        <button class="category-button fontDmSans">Mystery</button>
+        <NuxtLink to="/allStory/2" class="category-button fontDmSans">Adventure</NuxtLink>
+        <NuxtLink to="/allStory/3" class="category-button fontDmSans">Fiction</NuxtLink>
+        <NuxtLink to="/allStory/4" class="category-button fontDmSans">Fantasy</NuxtLink>
+        <NuxtLink to="/allStory/5" class="category-button fontDmSans">Drama</NuxtLink>
+        <NuxtLink to="/allStory/6" class="category-button fontDmSans">Heartfelt</NuxtLink>
+        <NuxtLink to="/allStory/7" class="category-button fontDmSans">Mystery</NuxtLink>
       </div>
     </div>
 

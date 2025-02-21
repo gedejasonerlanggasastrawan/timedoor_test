@@ -1,5 +1,5 @@
 <template>        
-  <NuxtLink :href=" '/detail/' + id" class="d-flex">        
+  <NuxtLink :href="'/detail/'+id" class="d-flex">        
     <div class="card fontDmSans">        
       <div class="image-container">        
         <img :src="imageSrc" class="card-img-top card-image" alt="..." />        
@@ -7,7 +7,7 @@
       </div>        
       <div class="card-body">        
         <h5 class="card-title fw-bold fontdmSans">{{ title }}</h5>        
-        <p class="card-text description fontDmSans">{{ description }}</p>      
+        <p class="card-text description fontDmSans" v-html="description"></p>      
         <div class="footer-card">        
           <img :src="profilePic" class="profile-pic" alt="Profile Picture" />        
           <div class="bottom-card justify-content-between d-flex align-items-center">        
@@ -15,7 +15,7 @@
               <p class="mb-0 fontDmSans">{{ userName }}</p>        
             </div>        
             <div class="d-flex align-items-center">        
-              <p class="mb-0 fontDmSans">{{ createdAt }}</p>        
+              <p class="mb-0 fontDmSans">{{ formattedDate(createdAt) }}</p>        
             </div>        
           </div>        
         </div>        
@@ -24,44 +24,56 @@
   </NuxtLink>        
 </template>        
     
-<script>      
-export default {      
-  props: {      
-    id: {
-      type: String,
-      required: true
-    },
-    imageSrc: {      
-      type: String,      
-      required: true,      
-    },      
-    profilePic: {      
-      type: String,      
-      required: true,      
-    },      
-    title: {      
-      type: String,      
-      required: true,      
-    },      
-    description: {      
-      type: String,      
-      required: true,      
-    },      
-    userName: {      
-      type: String,      
-      required: true,      
-    },      
-    createdAt: {      
-      type: String,      
-      required: true,      
-    },      
-    category: {      
-      type: String,      
-      required: true,      
-    },      
-  },      
-};      
-</script>      
+<script setup>
+import { defineProps } from 'vue';
+
+const props = defineProps({
+  id: {
+    type: String,
+    required: true
+  },
+  imageSrc: {
+    type: String,
+    required: true
+  },
+  profilePic: {
+    type: String,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  userName: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: String,
+    required: true
+  },
+  category: {
+    type: String,
+    required: true
+  }
+});
+
+// Format createdAt to "Month, DD YYYY"
+const formattedDate = () => {
+  const date = new Date(props.createdAt);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+  });
+};
+
+</script>
+    
       
 <style scoped>    
 a {

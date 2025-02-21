@@ -7,7 +7,7 @@
       </div>      
       <div class="card-body">      
         <h5 class="card-title fw-bold fontdmSans">{{ title }}</h5>      
-        <p class="card-text description fontDmSans">{{ description }}</p>      
+        <p class="card-text description fontDmSans"  v-html="description"></p>      
         <div class="footer-card">      
           <img :src="profilePic" class="profile-pic" alt="Profile Picture" />      
           <div class="bottom-card justify-content-between d-flex align-items-center">    

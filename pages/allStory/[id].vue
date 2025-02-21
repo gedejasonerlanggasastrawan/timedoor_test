@@ -1,5 +1,6 @@
 <template>
   <Header class="mb-5"></Header>
+  <Loading v-if="loadingStatus" />
   <h1 class="container my-4 fontPlayfair fw-bold">All Stories</h1>
   <nav class="breadcrumb container-fluid fontDmSans">
     <a href="/" class="breadcrumb-item"><span>Home</span></a>
@@ -20,7 +21,7 @@
         </div>
         <div class="category">
           <label for="category">Category :</label>
-          <select id="category" v-model="selectedCategory">
+          <select id="category" v-model="selectedCategory" @change="handleCategoryChange">
             <option value="all">All</option>
             <option value="1">Comedy</option>
             <option value="7">Romance</option>
@@ -47,8 +48,10 @@
     </div>
     <div class="story-list pt-5">
       <Card
-        v-for="story in paginatedStories"
+        v-if="Array.isArray(stories) && stories.length > 0"
+        v-for="story in stories"
         :key="story.title"
+        :id="story.id"
         :imageSrc="`${ngrokUrl}/storage/${story.images[0].image_path}`"
         :profilePic="`${ngrokUrl}/storage/${story.users.profile_image}`"
         :title="story.title"
@@ -57,6 +60,7 @@
         :createdAt="story.created_at"
         :category="story.category_id"
       />
+      <div v-else>Loading...</div>
     </div>
     <div class="pagination py-5 my-5">
       <span v-for="page in totalPages" :key="page">
@@ -89,6 +93,7 @@ import { ngrokUrl } from "@/store/ngrokConfig";
 import { useRoute } from "vue-router";
 import axios from "axios";
 
+const loadingStatus = ref(false);
 const authStore = useAuthStore();
 const route = useRoute();
 const sortOption = ref("newest");
@@ -117,10 +122,10 @@ const totalPages = computed(() => {
   return Math.ceil(filteredStories.value.length / itemsPerPage);
 });
 
-const paginatedStories = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredStories.value.slice(start, start + itemsPerPage);
-});
+// const paginatedStories = computed(() => {
+//   const start = (currentPage.value - 1) * itemsPerPage;
+//   return filteredStories.value.slice(start, start + itemsPerPage);
+// });
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
@@ -224,12 +229,42 @@ const fetchStoriesZA = async () => {
   }
 };
 
+const handleCategoryChange = async () => {
+  loadingStatus.value = true;
+
+  if (selectedCategory.value != "all") {
+    console.log("Category changed to:", selectedCategory.value);
+    // Bisa tambahkan logika lain seperti fetch data sesuai kategori
+
+    try {
+      const response = await axios.get(
+        `${ngrokUrl}/api/stories-by-category/${selectedCategory.value}`,
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
+      );
+      stories.value = response.data.data.data; // Access the nested data array
+      // console.log("--data---");
+      // console.log(stories.value);
+    } catch (error) {
+      console.error("Error fetching latest stories:", error);
+    } finally {
+      loadingStatus.value = false;
+    }
+  } else {
+    fetchAllStories();
+    loadingStatus.value = false;
+  }
+};
+
 onMounted(async () => {
   await authStore.fetchUserData(); // Fetch user data on component mount
   await fetchAllStories();
 });
 
-watch(async() => {
+watch(async () => {
   if (sortOption.value == "newest") {
     await fetchNewst();
   }
@@ -242,12 +277,6 @@ watch(async() => {
   if (sortOption.value == "za") {
     await fetchStoriesZA();
   }
-  console.log(selectedCategory.value);
-
-
-  // 
-
-
 });
 </script>
 
